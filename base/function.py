@@ -60,7 +60,7 @@ print(r)
 #练习:请定义一个函数quadratic(a, b, c)，接收3个参数，返回一元二次方程：ax2 + bx + c = 0的两个解。
 def quadratic(a,b,c):
 	if a == 0:
-		raise TypeError('a cant b zero')
+		raise TypeError('a cant be zero')
 	if not isinstance(a, (int, float)) and not isinstance(b, (int, float)) and not isinstance(c, (int, float)):
 		raise TypeError('bad operand type')
 	dirta = b**2 - 4*a*c
@@ -74,6 +74,43 @@ print(quadratic(2,3,1))
 print(quadratic(1,3,-4))
 
 #函数的参数
+#默认参数 最大的好处是能降低调用函数的难度。默认参数必须指向不变对象
+def add_end(L=[]):
+	L.append('END')
+	return L
+
+print(add_end()) #['END']
+print(add_end()) #['END', 'END']
+print(add_end()) #['END', 'END', 'END']
+
+#可以用None这个不变对象来实现
+def add_end2(L=None):
+	if L is None:
+		L = []
+	L.append('END')
+	return L 
+
+#可变参数 在参数前面加了一个*号
+def calc(*numbers):
+	sum = 0
+	for n in numbers:
+		sum = sum + n * n
+	return sum 
+
+print(calc(1,2))
+print(calc())
+#如果已经有一个list或tuple
+nums = [1,2,3]
+print(calc(*nums)) #*nums表示把nums这个list的所有元素作为可变参数传进去
+
+#关键字参数
+def person(name, age, **kw):
+	print('name:', name, 'age:', age, 'other:', kw)
+
+person('Michael', 30)
+person('Bob', 35, city='Beijing')
+person('Adam', 45, city='Beijing', job='Engineer')
+
 
 
 

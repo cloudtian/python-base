@@ -155,4 +155,188 @@ print(sorted([36, 5, -12, 9, -21], key=abs))
 
 #忽略大小写的排序
 print(sorted(['bob', 'ablout', 'Zoo', 'Credit'], key=str.lower))
+#反向排序
+print(sorted(['bob', 'about', 'Zoo', 'Credit'], key=str.lower, reverse=True))
+
+#练习 假设用一组tuple表示名称和成绩
+L = [('Bob', 75), ('Adam', 92), ('Bart', 66), ('Lisa', 88)]
+#用sorted()对上述列表分别按名称排序
+def by_name(t):
+    return t[0]
+def by_score(t):
+    return t[1]
+print('sorted by name:', sorted(L, key=by_name))
+print('sorted by score:', sorted(L, key=by_score))
+
+
+#返回函数
+#函数作为返回值
+#可变参数的求和
+def calc_sum(*args):
+    ax = 0
+    for n in args:
+        ax = ax + n
+    return ax
+#如果不需要立刻求和，可以不返回求和结果而是返回求和的函数
+def lazy_sum(*args):
+    def sum():
+        ax = 0
+        for n in args:
+            ax = ax + n
+        return ax
+    return sum
+f = lazy_sum(1, 3, 5, 7, 9)
+print(f)
+print(f())
+#当我们调用lazy_sum()时，每次调用都会返回一个新的函数，即使传入相同的参数
+f1 = lazy_sum(1, 3, 5, 7, 9)
+f2 = lazy_sum(1, 3, 5, 7, 9)
+print(f1 == f2) #False
+
+#闭包
+def count1():
+    fs = []
+    for i in range(1, 4): #[1, 2, 3]
+        def f():
+            return i * i
+        fs.append(f)
+    return fs
+f1, f2, f3 = count1()
+print(f1()) #9
+print(f2()) #9
+print(f3()) #9
+#返回闭包时牢记的一点就是：返回函数不要引用任何循环变量，或者后续会发生变化的变量。
+#如果一定要引用循环变量:再创建一个函数，用该函数的参数绑定循环变量当前的值，无论该循环变量后续如何更改，已绑定到函数参数的值不变
+def count2():
+    def f(j):
+        def g():
+            return j * j
+        return g
+    fs = []
+    for i in range(1, 4):
+        fs.append(f(i)) #f(i)立刻被执行，因此i的当前值被传入f()
+    return fs
+f1, f2, f3 = count2()
+print(f1()) #1
+print(f2()) #4
+print(f3()) #9
+#缺点是代码较长，可利用lambda函数缩短代码
+def count3():
+    return [(lambda x:(lambda : x*x))(i) for i in range(1, 4)]
+f1, f2, f3 = count3()
+print(f1()) #1
+print(f2()) #4
+print(f3()) #9
+
+
+#匿名函数
+#匿名函数lambda x: x * x 实际上就是：
+def f(x):
+    return x * x;
+#关键字lambda表示匿名函数，冒号前面的x表示函数参数
+#匿名函数有个限制，就是只能有一个表达式，不用写return，返回值就是该表达式的结果
+f = lambda x: x * x
+print(f)
+print(f(5))
+
+def build(x, y):
+    return lambda: x * x + y * y
+f = build(2, 3)
+print(f)
+print(f())
+
+def multipliers():
+    return [lambda x: i * x for i in range(4)]
+print([m(2) for m in multipliers()])
+
+
+#装饰器 Decorator
+#函数对象有一个__name__属性，可以拿到函数的名字
+def now1():
+    print('2017-9-28')
+f = now1
+print(now1.__name__)
+print(f.__name__)
+#增加now()函数的功能，比如：在函数调用前后自动打印日志，但又不希望修改now()函数的定义，这种在代码运行期间动态增加功能的方式，称为“装饰器”
+def log(func):
+    def wrapper(*args, **kw):
+        print('call %s():' % func.__name__)
+        result = func(*args, **kw)
+        print('after call %s():' % func.__name__)
+        return result
+    return wrapper
+
+#借助Python的@语法，把decorator置于函数的定义处
+@log
+def now2():
+    print('2017-9-28')
+now2()
+print(now2.__name__)#wrapper
+#把@log放到now2()函数的定义处，相当于执行了语句 now = log(now)
+#如果decorator本身需要传入参数，那就需要编写一个返回decorator的高阶函数，写出来会更复杂。比如，要自定义log的文本
+def log2(text):
+    def decorator(func):
+        def wrapper(*args, **kw):
+            print('%s %s():' % (text, func.__name__))
+            result = func(*args, **kw)
+            print('after %s %s():' % (text, func.__name__))
+        return wrapper
+    return decorator
+@log2('execute')
+def now3():
+    print('2017-9-28')
+now3()
+print(now3.__name__)#wrapper
+#经过decorator装饰之后的函数，__name__已经从原来的now变成了wrapper
+#需要使用Python内置的functools.wraps
+import functools
+def log3(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kw):
+        print('call %s():' % func.__name__)
+        return func(*args, **kw)
+    return wrapper
+
+def log4(text):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kw):
+            print('%s %s():'% (text, func.__name__))
+            return func(*args, **kw)
+        return wrapper
+    return decorator
+
+#练习：能在函数调用的前后打印出'begin call'和'end call'的日志
+def log5(text='call'):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kw):
+            print('begin %s %s():' % (text, func.__name__))
+            resultFn = func(*args, **kw)
+            print('end %s %s():' % (text, func.__name__))
+            return resultFn
+        return wrapper
+    return decorator
+@log5()
+def f():
+    print('test log5()')
+f()
+@log5('execute')
+def f2():
+    print('test log5(execute)')
+f2()
+@log5('execute')
+def add(x, y):
+    print('x = ', x, ',y = ', y)
+    return x + y
+print('1 + 2 =', add(1, 2))
+
+
+#偏函数 Partial function 
+#functools.partial就是帮助创建偏函数的
+import functools
+int2 = functools.partial(int, base=2)
+print(int2('1010101'))
+#functools.partial作用：把一个函数的某些参数给固定住（也就是设置默认值），返回一个新的函数，调用这个新函数会更简单
+print(int2('1010101', base=10)) #也可以在函数调用时传入其他值
 

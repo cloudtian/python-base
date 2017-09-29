@@ -275,11 +275,174 @@ class Student7(object):
 s = Student7('cloudtian')
 s()
 
-#pandaun一个对象是否能被调用，能被调用的对象是一个Callable对象，比如带有__call__()的类实例
+#判断一个对象是否能被调用，能被调用的对象是一个Callable对象，比如带有__call__()的类实例
 print('Student() is callable:', callable(Student()))
 print('max function is callable:', callable(max))
 print('[1, 2, 3] is callable:', callable([1, 2, 3]))
 print('None is callable:', callable('None'))
 print('"str" is callable:', callable('str'))
 
-#还要定制方法：https://docs.python.org/3/reference/datamodel.html#special-method-names
+#还有其他定制方法：https://docs.python.org/3/reference/datamodel.html#special-method-names
+
+
+#使用枚举类
+from enum import Enum
+
+Month = Enum('Month', ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'))
+#获得Month类型的枚举类，通过使用Month.Jan来引用一个常量
+for name, member in Month.__members__.items():
+    print(name, '=>', member, ',' , member.value)
+#value属性是自动赋给成员的int常量，默认从1开始计数
+
+#如果需要更精确的控制枚举类型，可以从Enum派生出自定义类
+from enum import Enum, unique
+
+@unique
+class Weekday(Enum):
+    Sun = 0 #Sun的value被设定为0
+    Mon = 1
+    Tue = 2
+    Wed = 3
+    Thu = 4
+    Fri = 5
+    Sat = 6
+#@unique装饰器可以帮助检查保证没有重复值
+
+#访问枚举类型若干种方法：
+day1 = Weekday.Mon
+print(day1)
+print(Weekday.Tue)
+print(Weekday['Tue'])
+print(Weekday.Tue.value)
+print(day1 == Weekday.Mon)
+print(day1 == Weekday.Tue)
+print(Weekday(1))
+print(day1 == Weekday(1))
+#print(Weekday(7)) #报错 7 is not a valid Weekday
+
+#Enum可以把一组相关常量定义在一个class中，且class不可变，而且成员可以直接比较
+
+
+#使用元类
+#type()函数可以查看一个类型或变量的类型，Hellow是一个class，它的类型就是type,而h是一个实例，它的类型就是class Hello
+#class的定义是运行时动态创建的，而创建class的方法就是使用type()函数
+from module.hello import Hello
+h = Hello()
+h.hello()
+print(type(Hello))
+print(type(h))
+
+#type()函数既可以返回一个对象的类型，又可以创建出新的类型
+#如：通过type()函数创建出Hello类，而无需通过class Hello(object)...的定义
+def fn(self, name='world'): #先定义函数
+    print('Hello, %s.' % name)
+Hello = type('Hello', (object,), dict(hello=fn)) #创建Hello class
+h = Hello()
+h.hello('cloudtian')
+print(type(Hello))
+print(type(h))
+
+#创建一个class对象，type()函数依次传入3个参数
+#1.class的名称
+#2.继承的父类集合，注意Python支持多重继承，如果只有一个父类，别忘了tuple的单元素写法
+#3.class的名称与函数绑定，这里把函数fn绑定到方法名hello上
+
+#通过type()函数创建的类和直接写class是完全一样的，因为Python解释器遇到class定义时，仅仅是扫描一下class定义的语法，然后调用type()函数创建出class。
+
+#metaclass 元类
+#先定义类，然后创建实例；先定义metaclass，然后创建类
+#先定义metaclass,就可以创建类，最后创建实例
+
+#metaclass是类的模版，所以必须从type类型派生
+class ListMetaclass(type):
+    def __new__(cls, name, bases, attrs):
+        attrs['add'] = lambda self, value: self.append(value)
+        return type.__new__(cls, name, bases, attrs)
+#定义类的时候要指示使用ListMetaclass来定制类，传入关键字参数metaclass
+class MyList(list, metaclass=ListMetaclass):
+    pass
+
+#__new__()方法接收到的参数依次是：
+#1.当前准备创建的类的对象
+#2.类的名称
+#3.类继承的父类集合
+#4.类的方法集合
+
+L = MyList()
+print(L)
+L.add(1)
+print(L)
+
+L2 = list()
+#L2.add(1) #报错，普通的list没有add()方法 'list' object has no attribute 'add'
+#正常情况下都是直接在MyList定义中添加add()方法
+
+#需要通过metaclass修改类定义的，ORM(Object Relational Mapping) 对象-关系映射
+#把关系数据库中的一行映射为一个对象，也就是一个类对应一个表，这样写代码更简单，不用直接操作SQL语句
+
+#定义一个User类来操作对应的数据库表User
+class User(Model):
+    #定义类的属性到列的映射
+    id = IntegerField('id')
+    name = StringField('username')
+    email = StringField('email')
+    password = StringField('password')
+
+#创建一个实例
+u = User(id=12345, name='cloudtian', email='test@orm.org', password='12345')
+#保存到数据库
+u.save()
+
+#定义Field类，负责保存数据库表的字段名和字段类型
+class Field(object):
+    def __init__(self, name, column_type):
+        self.name = name
+        self.column_type = column_type
+    def __str__(self):
+        return '<%s:%s>' % (self.__class__.__name__, self.name)
+class StringField(Field):
+    def __init__(self, name):
+        super(StringField, self).__init__(name, 'varchar(100)')
+class IntegerField(Field):
+    def __init__(self, name):
+        super(IntegerField, self).__init__(name, 'bigint')
+#ModelMetaclass
+class ModelMetaclass(type):
+    def __new__(cls, name, bases, attrs):
+        if name == 'Model':
+            return type.__new__(cls, name, bases, attrs)
+        print('Found model: %s' % name)
+        mappings = dict()
+        for k, v in attrs.items():
+            if isinstance(v, Field):
+                print('Found mapping: %s ==> %s' % (k, v))
+                mappings[k] = v
+        for k in mappings.keys():
+            attrs.pop(k)
+        attrs['__mappings__'] = mappings #保存属性和列的映射关系
+        attrs['__table__'] = name #假设表名和类名一致
+        return type.__new__(cls, name, bases, attrs)
+#基类Model
+class Model(dict, metaclass=ModelMetaclass):
+    def __init__(self, **kw):
+        super(Model, self).__init__(**kw)
+    def __getattr__(self, key):
+        try:
+            return self[key]
+        except KeyError:
+            raise AttributeError(r"'Model' object has no attribute '%s'" % key)
+
+    def __setattr__(self, key, value):
+        self[key] = value
+
+    def save(self):
+        fields = []
+        params = []
+        args = []
+        for k, v in self.__mappings__.items():
+            fields.append(v.name)
+            params.append('?')
+            args.append(getattr(self, k, None))
+        sql = 'insert into %s (%s) values (%s)' % (self.__table__, ','.join(fields), ','.join(params))
+        print('SQL: %s' % sql)
+        print('ARGS: %s' % str(args))

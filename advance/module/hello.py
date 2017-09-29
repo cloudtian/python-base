@@ -25,3 +25,9 @@ if __name__ == '__main__':
     #而如果在其他地方导入该hello模块时，if判断将失败
     #这种if测试可以让一个模块通过命令行运行时执行一些额外的代码，最常见的就是运行测试
     test()
+
+
+#添加一个Hello类
+class Hello(object):
+    def hello(self, name='world'):
+        print('Hello, %s.' % name)

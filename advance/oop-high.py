@@ -380,19 +380,6 @@ L2 = list()
 #需要通过metaclass修改类定义的，ORM(Object Relational Mapping) 对象-关系映射
 #把关系数据库中的一行映射为一个对象，也就是一个类对应一个表，这样写代码更简单，不用直接操作SQL语句
 
-#定义一个User类来操作对应的数据库表User
-class User(Model):
-    #定义类的属性到列的映射
-    id = IntegerField('id')
-    name = StringField('username')
-    email = StringField('email')
-    password = StringField('password')
-
-#创建一个实例
-u = User(id=12345, name='cloudtian', email='test@orm.org', password='12345')
-#保存到数据库
-u.save()
-
 #定义Field类，负责保存数据库表的字段名和字段类型
 class Field(object):
     def __init__(self, name, column_type):
@@ -409,20 +396,20 @@ class IntegerField(Field):
 #ModelMetaclass
 class ModelMetaclass(type):
     def __new__(cls, name, bases, attrs):
-        if name == 'Model':
+        if name == 'Model': #1.排除掉对Model类的修改
             return type.__new__(cls, name, bases, attrs)
         print('Found model: %s' % name)
         mappings = dict()
-        for k, v in attrs.items():
-            if isinstance(v, Field):
+        for k, v in attrs.items(): #2.在当前类中查找定义的类的所有属性
+            if isinstance(v, Field): #如果找到一个Field属性，
                 print('Found mapping: %s ==> %s' % (k, v))
-                mappings[k] = v
+                mappings[k] = v #就把它保存到一个__mappings__的dict中
         for k in mappings.keys():
-            attrs.pop(k)
+            attrs.pop(k) #同时从类属性中删除该Field属性，否则，容易造成运行时错误（实例的属性会遮盖类的同名属性）
         attrs['__mappings__'] = mappings #保存属性和列的映射关系
-        attrs['__table__'] = name #假设表名和类名一致
+        attrs['__table__'] = name #假设表名和类名一致，把表名保存到__table__中
         return type.__new__(cls, name, bases, attrs)
-#基类Model
+#基类Model，可以定义各种操作数据库的方法，比如save(),delete(),find(),update()等等
 class Model(dict, metaclass=ModelMetaclass):
     def __init__(self, **kw):
         super(Model, self).__init__(**kw)
@@ -446,3 +433,16 @@ class Model(dict, metaclass=ModelMetaclass):
         sql = 'insert into %s (%s) values (%s)' % (self.__table__, ','.join(fields), ','.join(params))
         print('SQL: %s' % sql)
         print('ARGS: %s' % str(args))
+
+#定义一个User类来操作对应的数据库表User
+class User(Model):
+    #定义类的属性到列的映射
+    id = IntegerField('id')
+    name = StringField('username')
+    email = StringField('email')
+    password = StringField('password')
+
+#创建一个实例
+u = User(id=12345, name='cloudtian', email='test@orm.org', password='12345')
+#保存到数据库
+u.save()

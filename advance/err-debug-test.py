@@ -101,3 +101,26 @@ print(10 / n)
 
 #IDE
 #如果要比较爽地设置断点、单步执行，就需要一个支持调试功能的IDE。目前比较好的Python IDE有PyCharm
+
+
+#单元测试
+#编写一个Dict类，行为和dict一致，但是可以通过属性来访问
+#module.mydict.py
+#module.mydict_test.py
+
+#运行单元测试
+#1.在最后加入两行代码:
+#if __name__ == '__main__':
+#    unittest.main()
+#2.命令行通过参数-m unittest直接运行单元测试
+
+#setUp与tearDown  这两个方法会分别在每调用一个测试方法的前后分别被执行
+
+
+#文档测试
+#Python内置的文档测试doctest模块可以直接提取注释中的代码并执行测试
+#doctest严格按照python交互式命令行的输入和输出来判断测试结果是否正确。只有测试异常的时候，可以用...表示中间的一大段烦人的输出
+#module.mydict2.py
+
+#练习 对函数fact(n)编写doctest并执行
+#module.fact_doctest.py

@@ -144,3 +144,11 @@ t2.join()
 #ThreadLocal最常用的地方就是为每个线程绑定一个数据库连接，HTTP请求，用户身份信息等，这样一个线程的所有调用到的处理函数都可以非常方便地访问这些资源。
 
 #进程 vs 线程
+#线程切换
+#计算密集型 vs IO密集型
+#异步IO，单线程的异步编程模型称为协程
+
+#分布式进程
+#在Thread和Process中，应当优选Process，因为Process更稳定，而且，Process可以分布到多台机器上，而Thread最多只能分布到同一台机器的多个CPU上
+#module.task_master (有报错)
+#module.task_worker

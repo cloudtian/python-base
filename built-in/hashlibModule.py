@@ -50,7 +50,8 @@ def calc_md5_salt(password):
     return calc_md5(password + 'the-Salt')
 
 #根据用户输入的登录名和口令模拟用户注册，计算更安全的MD5
-db = {}
+from collections import defaultdict
+db = defaultdict(lambda: '')
 
 def register(username, password):
     if db[username]:
@@ -73,20 +74,26 @@ def loginUser(username, password):
 
 continueProcess = True
 while continueProcess:
-    num = int(input('please input 1 for register, 2 for login, 3 for exit :'))
-    if num == 1:
-        #register
-        username1 = input('please input username for register:')
-        password1 =  input('please input password for register:')
-        register(username1, password1)
-    elif num == 2:
-        #login
-        username2 = input('please input username for login:')
-        password2 =  input('please input password for login:')
-        loginUser(username2, password2)
-    elif num == 3:
-        continueProcess = False
-    else:
-        print('input error')
+    num = input('please input 1 for register, 2 for login, 3 for exit, 4 for db :')
+    try:
+        num = int(num)
+        if num == 1:
+            #register
+            username1 = input('please input username for register:')
+            password1 =  input('please input password for register:')
+            register(username1, password1)
+        elif num == 2:
+            #login
+            username2 = input('please input username for login:')
+            password2 =  input('please input password for login:')
+            loginUser(username2, password2)
+        elif num == 3:
+            continueProcess = False
+        elif num == 4:
+            print(db)
+        else:
+            print('input number error')
+    except:
+        print('please input a number:1,2,3')
 
 

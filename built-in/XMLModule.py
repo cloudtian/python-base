@@ -54,23 +54,43 @@ print(''.join(L))
 
 from xml.parsers.expat import ParserCreate
 class WeatherSaxHandler(object):
-    pass
+    def __init__(self):
+        self.weather = {}
+        self.forcaseNum = 0
+
+    def start_element(self, name, attrs):
+        if name == 'yweather:location':
+            print('sax:start_element: %s, attrs: %s' % (name, str(attrs)))
+            self.weather['city'] = attrs['city']
+            self.weather['country'] = attrs['country']
+        elif name == 'yweather:forecast':
+            print('sax:start_element: %s, attrs: %s' % (name, str(attrs)))
+            self.forcaseNum = self.forcaseNum + 1
+            if self.forcaseNum == 1:
+                self.weather['today'] = {}
+                self.weather['today']['text'] = attrs['text']
+                self.weather['today']['low'] = int(attrs['low'])
+                self.weather['today']['high'] = int(attrs['high'])
+            elif self.forcaseNum == 2:
+                self.weather['tomorrow'] = {}
+                self.weather['tomorrow']['text'] = attrs['text']
+                self.weather['tomorrow']['low'] = int(attrs['low'])
+                self.weather['tomorrow']['high'] = int(attrs['high'])
+    
+    def end_element(self, name):
+        pass
+
+    def char_data(self, text):
+        pass
 
 def parse_weather(xml):
-    return {
-        'city': 'Beijing',
-        'country': 'China',
-        'today': {
-            'text': 'Partly Cloudy',
-            'low': 20,
-            'high': 33
-        },
-        'tomorrow': {
-            'text': 'Sunny',
-            'low': 21,
-            'high': 34
-        }
-    }
+    handler = WeatherSaxHandler()
+    parser = ParserCreate()
+    parser.StartElementHandler = handler.start_element
+    parser.EndElementHandler = handler.end_element
+    parser.CharacterDataHandler = handler.char_data
+    parser.Parse(xml)
+    return handler.weather
 
 # 测试:
 data = r'''<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>

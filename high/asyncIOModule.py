@@ -99,9 +99,56 @@ def wget(host):
 loop = asyncio.get_event_loop()
 tasks = [wget(host) for host in ['www.sina.com.cn', 'www.sohu.com', 'www.163.com']]
 loop.run_until_complete(asyncio.wait(tasks))
-loop.close()
+#loop.close()
 
 #小结
 #asyncio提供了完善的异步IO支持
 #异步操作需要在coroutine中通过yield from 完成
 #多个coroutine可以封装成一组Task然后并发执行
+
+#async/await
+#用asyncio提供的@asyncio.coroutine可以把一个generator标记为coroutine类型，然后在coroutine内部用yield from调用另一个coroutine实现异步操作
+#为了简化并更好的标识异步IO，从Python3.5开始引入了新的语法async和await，可以让coroutine的代码更简洁易读
+#async和await是正对coroutine的新语法：
+#1.把@asyncio.coroutine替换为async
+#2.把yield from替换为await
+
+async def hello3():
+    print('Hello3 world!')
+    r = await asyncio.sleep(1)
+    print('Hello3 again!')
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(hello3())
+#loop.close()
+
+#aiohttp
+#asyncio实现了TCP,UDP,SSL等协议，aiohttp则是基于asyncio实现的HTTP框架
+#安装 pip install aiohttp
+
+#然后编写一个HTTP服务器，分别处理以下URL:
+#/ - 首页返回b'<h1>Index</h1>'
+#/hello/{name} - 根据URL参数返回文本hello,%s!
+
+from aiohttp import web
+
+async def index(request):
+    await asyncio.sleep(0.5)
+    return web.Response(body=b'<h1>Index</h1>', content_type='text/plain')
+
+async def hello(request):
+    await asyncio.sleep(0.5)
+    text = '<h1>hello, %s!</h1>' % (request.match_info['name'])
+    return web.Response(body=text.encode('utf-8'), content_type='text/plain')
+
+async def init(loop):
+    app = web.Application(loop=loop)
+    app.router.add_route('GET', '/', index)
+    app.router.add_route('GET', '/hello/{name}', hello)
+    srv = await loop.create_server(app.make_handler(), '127.0.0.1', 8000)
+    print('Server started at http://127.0.0.1:8000...')
+    return srv
+loop = asyncio.get_event_loop()
+loop.run_until_complete(init(loop))
+loop.run_forever()
+#注意aiohttp的初始化函数init()也是一个coroutine，loop.create_server()则利用asyncio创建TCP服务。

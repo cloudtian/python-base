@@ -19,3 +19,9 @@
 
 #Day 2 - 编写Web App骨架
 #由于我们的Web App建立在asyncio的基础上，因此用aiohttp写一个基本的app.py
+
+#Day 3 - 编写ORM
+#由于Web框架使用了基于asyncio的aiohttp，这是基于协程的异步模型
+#aiomysql为MySQL数据库提供了异步IO驱动
+#orm.py
+

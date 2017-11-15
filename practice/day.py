@@ -27,3 +27,16 @@
 
 #Day 4 - 编写Model
 #model.py
+
+#Day 5 - 编写Web框架
+#Web框架的设计是完全从使用者出发，目的是让使用者编写尽可能少的代码。
+#RequestHandler来封装一个URL处理函数，目的是从URL函数中分析其需要接收的参数，从request中获取必要的参数，调用URL函数
+#然后把结果转换为web.Response对象，这样就完全符合aiohttp框架的要求
+#add_route函数用来注册一个URL处理函数
+#middleware是一种拦截器，一个URL在被某个函数处理前，可以经过一系列的middleware的处理
+#coroweb.py
+#apis.py
+#app.py
+#handlers.py
+
+

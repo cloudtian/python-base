@@ -194,28 +194,78 @@ class Model(dict, metaclass=ModelMetaclass):
         return value
 
     @classmethod
-    @asyncio.coroutine
-    def find(cls, pk):
+    async def findAll(cls, where=None, args=None, **kw):
+        ' find objects by where clause.'
+        sql = [cls.__select__]
+        if where:
+            sql.append('where')
+            sql.append(where)
+        if args is None:
+            args = []
+        orderBy = kw.get('orderBy', None)
+        if orderBy:
+            sql.append('order by')
+            sql.append(orderBy)
+        limit = kw.get('litmit', None)
+        if limit is not None:
+            sql.append('limit')
+            if isinstance(limit, int):
+                sql.append('?')
+                args.append(limit)
+            elif isinstance(limit, tuple) and len(limit) == 2:
+                sql.append('?, ?')
+                args.extend(limit)
+            else:
+                raise ValueError('Invalid limit value: %s' % str(limit))
+        rs = await select(' '.join(sql), args)
+        return [cls(**r) for r in rs]
+
+    @classmethod
+    async def findNumber(cls, selectField, where=None, args=None):
+        ' find number by select and where'
+        sql = ['select %s _num_ from `%s`' % (selectField, cls.__table__)]
+        if where:
+            sql.append('where')
+            sql.append(where)
+        rs = await select(' '.join(sql), args, 1)
+        if len(rs) == 0:
+            return None
+        return rs[0]['_num_']
+
+    @classmethod
+    async def find(cls, pk):
         ' find object by primary key.'
-        rs = yield from select('%s where `%s`=?' % (cls.__select__, cls.__primary_key__), [pk], 1)
+        rs = await select('%s where `%s`=?' % (cls.__select__, cls.__primary_key__), [pk], 1)
         if len(rs) == 0:
             return None
         return cls(**rs[0])
-    #这样就可以通过类方法实现主键查找：user = yield from User.find('123')
+    #这样就可以通过类方法实现主键查找：user = await User.find('123')
 
-    @asyncio.coroutine
-    def save(self):
+    async def save(self):
         args = list(map(self.getValueOrDefault, self.__fields__))
         args.append(self.getValueOrDefault(self.__primary_key__))
-        rows = yield from execute(self.__insert__, args)
+        rows = await execute(self.__insert__, args)
         if rows != 1:
             logging.warn('failed to insert record: affected rows: %s' % rows)
     #这样就可以把一个User实例存入数据库：
     # user = User(id=123, name='Cloudtian') 
-    # yield from user.save()
+    # await user.save()
 
     #完善ORM,findAll()-根据WHERE条件查找，findNumber()-根据WHERE条件查找，但返回的是整数，适用于select count(*)类型的SQL
     #以及update()和remove()方法，所有这些方法都必须用@asyncio.coroutine装饰，变成一个协程
 
     #调用时需注意：userr.save()没有任何效果，因为调用save()仅仅是创建了一个协程，并没有执行它，一定要用
-    #yield from user.save()才真正执行了INSERT操作
+    #await user.save()才真正执行了INSERT操作
+
+    async def update(self):
+        args = list(map(self.getValue(), self.__fields__))
+        args.append(self.getValue(self.__primary_key__))
+        rows = await execute(self.__update__, args)
+        if rows != 1:
+            logging.warn('failed to update by primary key: affected rows: %s' % rows)
+    
+    async def remove(self):
+        args = [self.getValue(self.__primary_key__)]
+        rows = await execute(self.__delete__, args)
+        if rows != 1:
+            logging.warn('failed to remove by primary key: affected rows: %s' % rows)

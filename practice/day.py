@@ -25,3 +25,5 @@
 #aiomysql为MySQL数据库提供了异步IO驱动
 #orm.py
 
+#Day 4 - 编写Model
+#model.py

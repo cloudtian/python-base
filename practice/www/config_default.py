@@ -1,5 +1,8 @@
 #-*- coding:utf-8 -*-
 
+'''
+Default configuartions.
+'''
 configs = {
     'debug': True,
     'db': {
@@ -7,7 +10,7 @@ configs = {
         'port': 3306,
         'user': 'cloudtian',
         'password': 'cloudtian',
-        'database': 'awesome'
+        'db': 'awesome'
     },
     'session':{
         'secret': 'Awesome'

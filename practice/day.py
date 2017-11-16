@@ -47,6 +47,11 @@
 #config_default.py
 #config_override.py
 
-#Day 7 -编写MVC
+#Day 7 - 编写MVC
 #ORM框架，Web框架和配置已就绪，可以开始编写一个最简单的MVC，把它们全部启动起来
 #handlers.py
+
+#Day 8 - 构建前端
+#引入uikit框架的样式
+#添加__base__.html, blogs.html
+

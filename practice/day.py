@@ -55,3 +55,9 @@
 #引入uikit框架的样式
 #添加__base__.html, blogs.html
 
+#Day 9 - 编写API
+#REST(Representational State Transfer)风格的软件架构模式
+#REST是一种设计API的模式。最常用的数据格式是JSON.由于JSON能直接被JavaScript读取，所以，以JSON格式编写的REST风格的API具有简单，易读，易用的特点。
+#由于API就是把Web App的功能全部封装了，所以通过API操作数据，可以极大地前后端代码分离，使得后端代码易于测试，前端代码编写更简单。
+#一个API也是一个URL的处理函数，通过@api把函数变成JSON格式的REST API
+

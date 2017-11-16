@@ -6,3 +6,10 @@
 *.ntvs*
 *.njsproj
 *.sln
+
+# Packages
+__pycache__
+
+
+sina.html
+vue.js

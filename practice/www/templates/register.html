@@ -27,7 +27,9 @@
             },
             methods: {
                 submit: function (event) {
-                    var $el = $(this.$el);
+                    var me = this,
+                        $el = $(this.$el);
+
                     if (!this.name.trim()) {
                         this.errMsg = '请输入名字';
                         return;
@@ -46,15 +48,29 @@
                     }
                     this.errMsg =  '';
                     var email = this.email.trim().toLowerCase();
-                    $($el).postJSON('/api/users', {
-                        name: this.name.trim(),
-                        email: email,
-                        passwd: CryptoJS.SHA1(email + ':' + this.password1).toString()
-                    }, function (err, r) {
-                        if (err) {
-                            return $el.showFormError(err);
+                    $.ajax({
+                        type: 'POST',
+                        url: '/api/users',
+                        data: {
+                            name: this.name.trim(),
+                            email: email,
+                            passwd: CryptoJS.SHA1(email + ':' + this.password1).toString()
+                        },
+                        dataType: 'json',
+                        success: function (json) {
+                            if (json.error) {
+                                me.errMsg = json.data + '->' + json.error;
+                                return;
+                            }
+                            me.errMsg = '';
+                            return location.assign('/');
+                        },
+                        failure: function (err) {
+                            me.errMsg = err;
+                        },
+                        error: function (err) {
+                            me.errMsg = err;
                         }
-                        return location.assign('/');
                     });
                 }
             }

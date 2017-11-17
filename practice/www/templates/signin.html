@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html class="uk-height-1-1">
+    <head>
+        <meta charset="utf-8">
+        <title>登录 - Awesome Python Webapp</title>
+        {% include '__lib__.html' %}
+        <script>
+            function validateEmail(email) {
+                var re = /^[a-z0-9\.\-\_]+\@[a-z0-9\-\_]+(\.[a-z0-9\-\_]+){1,4}$/;
+                return re.test(email.trim().toLowerCase());
+            }
+
+            $(function () {
+                var vm = new Vue({
+                    el: '#vm',
+                    data: {
+                        email: '',
+                        password: '',
+                        errMsg: ''
+                    },
+                    watch: {
+                        errMsg: function () {
+                            $(this.$refs.errMsgBox).text(this.errMsg);
+                        }
+                    },
+                    methods: {
+                        submit: function (event) {
+                            var me = this,
+                                $el = $(this.$el),
+                                email = this.email.trim().toLowerCase();
+
+                            if (!validateEmail(this.email)) {
+                                this.errMsg = '请输入正确的Email地址';
+                                return;
+                            }
+                            if (this.password.length < 6) {
+                                this.errMsg = '密码长度至少为6个字符';
+                                return;
+                            }
+                            $.ajax({
+                                type: 'POST',
+                                url: '/api/authenticate',
+                                data: {
+                                    email: email,
+                                    passwd: CryptoJS.SHA1(email + ':' + this.password).toString()
+                                },
+                                dataType: 'json',
+                                success: function (json) {
+                                    if (json.error) {
+                                        me.errMsg = json.data + '->' + json.error + '->' + json.message;
+                                        return;
+                                    }
+                                    me.errMsg = '';
+                                    return location.assign('/');
+                                },
+                                failure: function (err) {
+                                    me.errMsg = err;
+                                },
+                                error: function (err) {
+                                    me.errMsg = err;
+                                }
+                            });
+                        }
+                    }
+                });
+                //$(vm.$el).show()
+            });
+        </script>
+   </head>
+    <body class="uk-height-1-1">
+        <div class="uk-vertical-align uk-text-center uk-height-1-1">
+            <div class="uk-vertical-align-middle" style="width: 320px">
+                <p><a href="/" class="uk-icon-button"><i class="uk-icon-html5"></i></a><a href="/">Awesome Python Webapp</a></p>
+                <form id="vm" @submit.prevent="submit" class="uk-panel uk-panel-box uk-form">
+                    <div class="uk-alert uk-alert-danger" :class="{'uk-hidden': !errMsg}" ref="errMsgBox"></div>
+                    <div class="uk-form-row">
+                        <div class="uk-form-icon uk-width-1-1">
+                            <i class="uk-icon-envelope-o"></i>
+                            <input type="text" v-model="email" maxlength="50" placeholder="your-name@example.com" class="uk-width-1-1 uk-form-large">
+                        </div>
+                    </div>
+                    <div class="uk-form-row">
+                        <div class="uk-form-icon uk-width-1-1">
+                            <i class="uk-icon-lock"></i>
+                            <input type="password" v-model="password" maxlength="50" placeholder="输入密码" class="uk-width-1-1 uk-form-large">
+                        </div>
+                    </div>
+                    <div class="uk-form-row">
+                        <button type="submit" class="uk-button uk-button-primary"><i class="uk-icon-sign-in"></i> 登录</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </body> 
+</html>

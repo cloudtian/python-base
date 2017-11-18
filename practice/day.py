@@ -86,3 +86,4 @@
 #templates/manage_blog_edit.html
 #handlers.py
 
+#Day 12 - 编写日志列表页

@@ -20,11 +20,6 @@
                 password2: '',
                 errMsg: ''
             },
-            watch: {
-                errMsg: function () {
-                    $(this.$refs.errMsgBox).text(this.errMsg);
-                }
-            },
             methods: {
                 submit: function (event) {
                     var me = this,
@@ -86,7 +81,7 @@
 <div class="uk-width-2-3">
     <h1>欢迎注册！</h1>
     <form id="vm" @submit.prevent="submit" class="uk-form uk-form-stacked">
-        <div class="uk-alert uk-alert-danger" :class="{'uk-hidden': !errMsg}" ref="errMsgBox"></div>
+        <div class="uk-alert uk-alert-danger" :class="{'uk-hidden': !errMsg}" v-text="errMsg"></div>
         <div class="uk-form-row">
             <label class="uk-form-label">名字：</label>
             <div class="uk-form-controls">

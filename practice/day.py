@@ -82,3 +82,7 @@
 #这个算法的关键在于SHA1是一种单向算法，即可以通过原始字符串计算出SHA1结果，但无法通过SHA1结果反推出原始字符串。
 
 
+#Day 11 - 编写日志创建页
+#templates/manage_blog_edit.html
+#handlers.py
+

@@ -18,11 +18,6 @@
                         password: '',
                         errMsg: ''
                     },
-                    watch: {
-                        errMsg: function () {
-                            $(this.$refs.errMsgBox).text(this.errMsg);
-                        }
-                    },
                     methods: {
                         submit: function (event) {
                             var me = this,
@@ -72,7 +67,7 @@
             <div class="uk-vertical-align-middle" style="width: 320px">
                 <p><a href="/" class="uk-icon-button"><i class="uk-icon-html5"></i></a><a href="/">Awesome Python Webapp</a></p>
                 <form id="vm" @submit.prevent="submit" class="uk-panel uk-panel-box uk-form">
-                    <div class="uk-alert uk-alert-danger" :class="{'uk-hidden': !errMsg}" ref="errMsgBox"></div>
+                    <div class="uk-alert uk-alert-danger" :class="{'uk-hidden': !errMsg}" v-text="errMsg"></div>
                     <div class="uk-form-row">
                         <div class="uk-form-icon uk-width-1-1">
                             <i class="uk-icon-envelope-o"></i>

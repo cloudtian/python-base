@@ -74,7 +74,7 @@ async def cookie2user(cookie_str):
 #首页
 @get('/')
 async def index(request):
-    blogs = await Blog.findAll('user_id=?', [request.__user__.id], orderBy='created_at desc')
+    blogs = await Blog.findAll(orderBy='created_at desc')
     return {
         '__template__': 'blogs.html',
         'blogs': blogs,

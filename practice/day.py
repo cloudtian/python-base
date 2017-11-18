@@ -87,3 +87,15 @@
 #handlers.py
 
 #Day 12 - 编写日志列表页
+#Page分页显示Blog的功能
+#manage_blogs.html
+
+#Day 13 - 提升开发效率
+#当文件改变时，自动监听并重启服务器
+#pymonitor.py 让它启动wsgiapp.py，并时刻监控www目录下的代码改动，有改动时，先把当前wsgiapp.py进程杀掉，再重启，就完成了服务器进程的自动重启。
+#要监控目录文件的变化，也无需自己手动定时扫描，Python的第三方库watchdog可以利用操作系统的API来监控目录文件的变化，并发送通知。
+#安装： pip install watchdog
+#利用watchdog接收文件变化的通知，如果是.py文件，就自动重启wsgiapp.py进程。
+#利用Python自带的subprocess实现进程的启动和终止，并把输入输出重定向到当前进程的输入输出中
+#python pymonitor.py wsgiapp.py
+#./pymonitor.py app.py
